@@ -1,0 +1,92 @@
+@page {
+  size: A4;
+  margin: 16mm 15mm 18mm 15mm;
+}
+html { font-size: 10.5pt; }
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1f2937;
+  line-height: 1.5;
+  max-width: 100%;
+  margin: 0;
+}
+h1, h2, h3 { color: #17365d; }
+h1 {
+  font-size: 22pt;
+  margin: 0 0 12pt 0;
+  padding-bottom: 7pt;
+  border-bottom: 3px solid #2f5597;
+}
+h2 {
+  font-size: 16pt;
+  margin-top: 22pt;
+  padding-bottom: 4pt;
+  border-bottom: 1px solid #cfd8e3;
+}
+h3 { font-size: 12.5pt; margin-top: 15pt; }
+p { margin: 7pt 0; text-align: justify; }
+a { color: #174ea6; text-decoration: none; }
+.student-data {
+  background: #eef3f9;
+  border-left: 5px solid #2f5597;
+  padding: 11pt 13pt;
+  margin: 10pt 0 18pt;
+  border-radius: 3px;
+}
+.callout {
+  background: #f7f9fc;
+  border: 1px solid #d8dee8;
+  border-left: 4px solid #2f5597;
+  padding: 9pt 11pt;
+  margin: 12pt 0;
+}
+figure {
+  margin: 12pt 0 18pt;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+figure img {
+  display: block;
+  max-width: 100%;
+  max-height: 188mm;
+  margin: 0 auto;
+  object-fit: contain;
+  border: 1px solid #c7ced8;
+  border-radius: 3px;
+}
+figcaption {
+  font-size: 9pt;
+  color: #4b5563;
+  text-align: center;
+  margin-top: 5pt;
+}
+pre {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 8.6pt;
+  background: #f6f8fa;
+  border: 1px solid #d8dee8;
+  padding: 8pt;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  break-inside: avoid;
+}
+code { font-family: Consolas, "Courier New", monospace; font-size: .92em; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 10pt 0 14pt;
+  font-size: 9.5pt;
+  break-inside: avoid;
+}
+th, td { border: 1px solid #cbd5e1; padding: 6pt 7pt; vertical-align: top; }
+th { background: #eef3f9; color: #17365d; }
+ul { margin-top: 5pt; }
+li { margin: 2.5pt 0; }
+.feedback-page {
+  break-before: page;
+  page-break-before: always;
+}
+.feedback-page + h1 { margin-top: 0; }
+@media print {
+  a { color: #1f2937; }
+}

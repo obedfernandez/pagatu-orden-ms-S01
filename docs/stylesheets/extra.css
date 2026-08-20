@@ -1,0 +1,146 @@
+:root {
+  --primary: #000000;
+  --secondary: #000000;
+  --accent: #f5f5f5;
+  --text: #202124;
+  --muted: #5f6368;
+  --border: #d8dee8;
+}
+
+body {
+  color: var(--text);
+}
+
+/* Títulos y subtítulos */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #000000 !important;
+}
+
+h1 {
+  border-bottom: 3px solid #000000;
+  padding-bottom: .25rem;
+}
+
+h2 {
+  margin-top: 2rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: .2rem;
+}
+
+/* Enlaces normales y navegación de MkDocs */
+a,
+a:visited,
+a:hover,
+a:focus,
+a:active,
+nav a,
+nav a:visited,
+.md-nav__link,
+.md-nav__link:visited,
+.md-nav__link:hover,
+.md-nav__link--active,
+.md-sidebar a,
+.md-sidebar a:visited,
+.bs-sidebar a,
+.bs-sidebar a:visited {
+  color: #000000 !important;
+}
+
+/* Índice / tabla de contenidos */
+.toclink,
+.toclink:visited,
+.toclink:hover {
+  color: #000000 !important;
+}
+
+/* Código */
+code {
+  font-size: .92em;
+}
+
+pre {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+/* Imágenes */
+img {
+  max-width: 100%;
+  border: 1px solid #cfd6df;
+  border-radius: 4px;
+}
+
+figure {
+  margin: 1.2rem 0 2rem;
+}
+
+figcaption {
+  color: var(--muted);
+  font-size: .92rem;
+  margin-top: .45rem;
+  text-align: center;
+}
+
+/* Datos del estudiante */
+.student-data {
+  background: var(--accent);
+  border-left: 5px solid #000000;
+  padding: 1rem 1.2rem;
+  margin: 1rem 0 2rem;
+}
+
+/* Cuadros informativos */
+.callout {
+  background: #f7f9fc;
+  border: 1px solid var(--border);
+  border-left: 4px solid #000000;
+  padding: .8rem 1rem;
+  margin: 1rem 0;
+}
+
+.small {
+  font-size: .92rem;
+  color: var(--muted);
+}
+
+/* Impresión / PDF */
+@media print {
+  .md-header,
+  .md-tabs,
+  .md-sidebar,
+  .md-footer,
+  nav {
+    display: none !important;
+  }
+
+  main,
+  .md-main__inner,
+  .md-content {
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  figure,
+  pre,
+  table {
+    break-inside: avoid;
+  }
+
+  h2 {
+    break-before: auto;
+  }
+
+  .page-break {
+    break-before: page;
+  }
+
+  .feedback-page {
+    break-before: page;
+    font-size: 10.5pt;
+  }
+}

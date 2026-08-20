@@ -1,0 +1,9 @@
+site_name: Pagatu - Evidencia S01
+site_description: Evidencia individual de la sesión S01 - orden-ms
+site_author: Emerlin Obed Fernandez Condori
+theme:
+  name: mkdocs
+nav:
+  - S01 - orden-ms: index.md
+extra_css:
+  - stylesheets/extra.css
