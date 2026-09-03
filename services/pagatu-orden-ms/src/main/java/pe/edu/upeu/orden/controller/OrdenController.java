@@ -5,12 +5,14 @@ import pe.edu.upeu.orden.dto.OrdenResponse;
 import pe.edu.upeu.orden.service.OrdenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/ordenes")
 @RequiredArgsConstructor
@@ -20,6 +22,7 @@ public class OrdenController {
 
     @GetMapping
     public List<OrdenResponse> listar() {
+        log.info("Listando órdenes");
         return ordenService.listar();
     }
 
