@@ -2,11 +2,20 @@ server:
   port: 18080
 
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8085/.well-known/jwks.json
   cloud:
     gateway:
       server:
         webmvc:
           routes:
+            - id: pagatu-auth-login
+              uri: lb://pagatu-auth-ms
+              predicates:
+                - Path=/api/v1/auth/**
             - id: pagatu-catalogo-categorias
               uri: lb://pagatu-catalogo-ms
               predicates:
