@@ -1,0 +1,16 @@
+name: pagatu-eventos-py
+
+services:
+  pagatu-eventos-py:
+    build: .
+    container_name: pagatu-eventos-py
+    tty: true
+    stdin_open: true
+    command: ["sh", "-c", "tail -f /dev/null"]
+    networks:
+      - pagatu-kafka-dev-net
+
+networks:
+  pagatu-kafka-dev-net:
+    external: true
+    name: pagatu-kafka-dev-net

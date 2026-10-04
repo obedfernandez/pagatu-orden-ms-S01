@@ -19,9 +19,23 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
-    properties:
-      hibernate:
-        format_sql: false
+  kafka:
+    bootstrap-servers: pagatu-kafka:9092
+    consumer:
+      group-id: pagatu-cliente-ms-notificaciones
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+        spring.json.value.default.type: pe.edu.upeu.cliente.event.OrdenPagadaEvento
+        spring.json.trusted.packages: pe.edu.upeu.cliente.event
+        spring.json.use.type.headers: false
+
+app:
+  kafka:
+    topic:
+      ordenes-pagadas: orden-pagada-eventos
 
 springdoc:
   swagger-ui:

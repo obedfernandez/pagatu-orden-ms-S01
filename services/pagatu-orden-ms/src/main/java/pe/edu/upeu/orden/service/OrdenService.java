@@ -8,4 +8,5 @@ public interface OrdenService {
     OrdenResponse crear(OrdenRequest request, Long idCliente);
     OrdenResponse findById(Long id);
     List<OrdenResponse> listar();
+    void marcarPagada(Long ordenId);
 }
