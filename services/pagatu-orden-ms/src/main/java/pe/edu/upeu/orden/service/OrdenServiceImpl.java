@@ -1,24 +1,34 @@
 package pe.edu.upeu.orden.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.orden.dto.*;
 import pe.edu.upeu.orden.entity.EstadoOrden;
 import pe.edu.upeu.orden.entity.Orden;
 import pe.edu.upeu.orden.entity.OrdenDetalle;
+import pe.edu.upeu.orden.event.OrdenCreadaEvento;
+import pe.edu.upeu.orden.event.OrdenPagadaEvento;
+import pe.edu.upeu.orden.messaging.OrdenEventosProducer;
+import pe.edu.upeu.orden.messaging.OrdenPagadaEventosProducer;
 import pe.edu.upeu.orden.repository.OrdenRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrdenServiceImpl implements OrdenService {
 
     private final OrdenRepository ordenRepository;
     private final ProductoConsultaService productoConsultaService;
+    private final OrdenEventosProducer ordenEventosProducer;
+    private final OrdenPagadaEventosProducer ordenPagadaEventosProducer;
 
     @Override
     @Transactional
@@ -32,10 +42,14 @@ public class OrdenServiceImpl implements OrdenService {
         BigDecimal total = BigDecimal.ZERO;
         boolean validacionCompleta = true;
 
+        // Reserve each valid line and undo earlier reservations if a later line fails.
+        List<DetalleOrdenRequest> reservas = new ArrayList<>();
         for (DetalleOrdenRequest item : request.getDetalles()) {
             ProductoDto producto = productoConsultaService.consultarProducto(item.getIdProducto());
+            boolean stockReservado = producto != null
+                    && productoConsultaService.descontarStock(item.getIdProducto(), item.getCantidad());
 
-            if (producto == null) {
+            if (!stockReservado) {
                 validacionCompleta = false;
                 detalles.add(OrdenDetalle.builder()
                         .orden(orden)
@@ -47,8 +61,8 @@ public class OrdenServiceImpl implements OrdenService {
                 continue;
             }
 
-            BigDecimal subtotal = producto.getPrecio()
-                    .multiply(BigDecimal.valueOf(item.getCantidad()));
+            reservas.add(item);
+            BigDecimal subtotal = producto.getPrecio().multiply(BigDecimal.valueOf(item.getCantidad()));
             total = total.add(subtotal);
 
             detalles.add(OrdenDetalle.builder()
@@ -60,12 +74,81 @@ public class OrdenServiceImpl implements OrdenService {
                     .build());
         }
 
+        if (!validacionCompleta) {
+            // Better than the guided example: don't leak stock when a later line is invalid.
+            for (DetalleOrdenRequest reservado : reservas) {
+                if (!productoConsultaService.restaurarStock(reservado.getIdProducto(), reservado.getCantidad())) {
+                    log.error("component=stock productoId={} status=reconciliation_required motivo=rollback_reserva_fallido",
+                            reservado.getIdProducto());
+                }
+            }
+        }
+
         orden.setDetalles(detalles);
         orden.setTotal(validacionCompleta ? total : null);
         orden.setEstado(validacionCompleta ? EstadoOrden.PENDIENTE_PAGO : EstadoOrden.CARRITO);
 
         Orden guardada = ordenRepository.save(orden);
+        if (guardada.getEstado() == EstadoOrden.PENDIENTE_PAGO) {
+            ordenEventosProducer.publicarTrasCommit(OrdenCreadaEvento.builder()
+                    .tipoEvento("orden.creada")
+                    .ordenId(guardada.getId())
+                    .idCliente(guardada.getIdCliente())
+                    .total(guardada.getTotal())
+                    .metodoPago(guardada.getMetodoPago())
+                    .origen("pagatu-orden-ms")
+                    .timestamp(Instant.now().toEpochMilli())
+                    .build());
+        }
         return toResponse(guardada);
+    }
+
+    @Override
+    @Transactional
+    public void marcarPagada(Long ordenId) {
+        Orden orden = ordenRepository.findByIdParaTransicion(ordenId).orElse(null);
+        if (orden == null || orden.getEstado() != EstadoOrden.PENDIENTE_PAGO) {
+            log.warn("component=processor ordenId={} status=ignored motivo=\"la orden no existe o no esta pendiente de pago\"", ordenId);
+            return;
+        }
+
+        orden.setEstado(EstadoOrden.PAGADA);
+        ordenRepository.save(orden);
+
+        // Actividad autónoma S08: evento adicional, emitido solo después del commit.
+        ordenPagadaEventosProducer.publicarTrasCommit(OrdenPagadaEvento.builder()
+                .tipoEvento("orden.pagada")
+                .ordenId(orden.getId())
+                .idCliente(orden.getIdCliente())
+                .monto(orden.getTotal())
+                .canalNotificacion("WHATSAPP")
+                .origen("pagatu-orden-ms")
+                .timestamp(Instant.now().toEpochMilli())
+                .build());
+
+        log.info("component=processor ordenId={} estado={} status=processed", ordenId, orden.getEstado());
+    }
+
+    @Override
+    @Transactional
+    public void compensar(Long ordenId) {
+        Orden orden = ordenRepository.findByIdParaTransicion(ordenId).orElse(null);
+        if (orden == null || orden.getEstado() != EstadoOrden.PENDIENTE_PAGO) {
+            log.warn("component=processor ordenId={} status=ignored motivo=\"la orden no existe o ya no esta pendiente de pago\"", ordenId);
+            return;
+        }
+        // The remote stock adjustment precedes the local state change; failures
+        // are logged for reconciliation while the state transition still completes.
+        for (OrdenDetalle detalle : orden.getDetalles()) {
+            if (detalle.getNombreProducto() != null && detalle.getCantidad() != null
+                    && !productoConsultaService.restaurarStock(detalle.getIdProducto(), detalle.getCantidad())) {
+                log.error("component=stock ordenId={} productoId={} status=reconciliation_required",
+                        ordenId, detalle.getIdProducto());
+            }
+        }
+        orden.setEstado(EstadoOrden.CANCELADA);
+        ordenRepository.save(orden);
+        log.info("component=processor ordenId={} estado={} status=compensated", ordenId, orden.getEstado());
     }
 
     @Override
@@ -79,9 +162,7 @@ public class OrdenServiceImpl implements OrdenService {
     @Override
     @Transactional(readOnly = true)
     public List<OrdenResponse> listar() {
-        return ordenRepository.findAll().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        return ordenRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     private OrdenResponse toResponse(Orden orden) {
@@ -91,9 +172,7 @@ public class OrdenServiceImpl implements OrdenService {
                         .nombreProducto(d.getNombreProducto())
                         .cantidad(d.getCantidad())
                         .precioUnitario(d.getPrecioUnitario())
-                        .subtotal(d.getPrecioUnitario() == null
-                                ? null
-                                : d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad())))
+                        .subtotal(d.getPrecioUnitario() == null ? null : d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad())))
                         .build())
                 .collect(Collectors.toList());
 

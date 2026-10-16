@@ -38,6 +38,16 @@ public class ProductoController {
         return productoService.actualizar(id, request);
     }
 
+    @PatchMapping("/{id}/descontar-stock")
+    public void descontarStock(@PathVariable Long id, @RequestParam Integer cantidad) {
+        productoService.descontarStock(id, cantidad);
+    }
+
+    @PatchMapping("/{id}/restaurar-stock")
+    public void restaurarStock(@PathVariable Long id, @RequestParam Integer cantidad) {
+        productoService.restaurarStock(id, cantidad);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {

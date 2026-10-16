@@ -5,6 +5,10 @@ import pe.edu.upeu.catalogo.dto.ProductoResponse;
 import pe.edu.upeu.catalogo.entity.Categoria;
 import pe.edu.upeu.catalogo.entity.Producto;
 import pe.edu.upeu.catalogo.exception.ResourceNotFoundException;
+import pe.edu.upeu.catalogo.exception.StockInsuficienteException;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 import pe.edu.upeu.catalogo.mapper.ProductoMapper;
 import pe.edu.upeu.catalogo.repository.CategoriaRepository;
 import pe.edu.upeu.catalogo.repository.ProductoRepository;
@@ -50,6 +54,31 @@ public class ProductoService {
 
     public void eliminar(Long id) {
         productoRepository.delete(buscarOFallar(id));
+    }
+
+    @Transactional
+    public void descontarStock(Long id, Integer cantidad) {
+        validarCantidad(cantidad);
+        Producto producto = productoRepository.findByIdParaStock(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id));
+        if (producto.getStock() < cantidad) {
+            throw new StockInsuficienteException("Stock insuficiente para el producto: " + id);
+        }
+        producto.setStock(producto.getStock() - cantidad);
+    }
+
+    @Transactional
+    public void restaurarStock(Long id, Integer cantidad) {
+        validarCantidad(cantidad);
+        Producto producto = productoRepository.findByIdParaStock(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id));
+        producto.setStock(Math.addExact(producto.getStock(), cantidad));
+    }
+
+    private void validarCantidad(Integer cantidad) {
+        if (cantidad == null || cantidad <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La cantidad debe ser positiva");
+        }
     }
 
     private Producto buscarOFallar(Long id) {

@@ -17,13 +17,17 @@ pagatu/
 │   └── silabo_dist_2026_2.md # Sílabo vigente
 ├── services/                 # Microservicios
 │   ├── pagatu-catalogo-ms/   # Categorías y productos (S1)
-│   ├── pagatu-orden-ms/      # Órdenes de compra (S2)
-│   └── pagatu-cliente-ms/    # Perfil de cliente + RENIEC/SUNAT (S2)
+│   ├── pagatu-orden-ms/      # Órdenes + eventos Kafka (S2/S8)
+│   ├── pagatu-cliente-ms/    # Perfil de cliente + consumidor autónomo S8
+│   ├── pagatu-auth-ms/       # Autenticación/JWT (S7)
+│   └── pagatu-pago-ms/       # Pagos asíncronos con Kafka (S8)
 ├── infra/                    # Infraestructura que los microservicios necesitan para funcionar
 │   ├── pagatu-config/        # Config Server (S2, listo)
 │   ├── pagatu-eureka/        # Service Registry (S3, listo)
-│   └── (Gateway, S4, pendiente)
-├── obs/                       # Prometheus + Loki + Promtail (S3, opcional) — observa infra/ y services/ desde afuera, no es una dependencia de arranque
+│   └── pagatu-gateway/       # API Gateway (S4/S7/S8)
+├── kafka/                     # Kafka + Kafka UI (S8)
+├── uso-rapido/                # Cliente Python Kafka (S8)
+├── obs/                       # Prometheus + Loki + Promtail (S3, opcional)
 └── clients/                  # Frontend Angular (pendiente, desde S11)
 ```
 
@@ -45,9 +49,26 @@ El detalle completo (puertos, variables de entorno, producción local con Docker
 
 ## Tecnologías
 
-- Java 21, Spring Boot 4.0.7
+- Java 21, Spring Boot 4.1.1
 - PostgreSQL, Flyway (migraciones versionadas)
 - MapStruct (mapeo DTO ↔ entidad)
 - Docker / Docker Compose
-- Spring Cloud Config (S2), Eureka (S3), Gateway (S4)
+- Spring Cloud Config (S2), Eureka (S3), Gateway (S4), JWT (S7), Spring for Apache Kafka (S8)
 - Angular 21 (S11)
+
+
+## S08 - Mensajería asíncrona
+
+La implementación de S08 está documentada en `S08_COMPLETADO.md`, `S08_PASOS_EJECUCION.md`, `S08_EVIDENCIA_GUIA.md` y `docs/S08_CONTRATOS_EVENTOS.md`.
+
+## Sesión S09 – Consistencia distribuida (sobre S08)
+
+Esta versión conserva los avances personalizados de S08 y agrega idempotencia,
+`pago.fallido`, Saga compensadora e implementación opcional de stock. Para
+preparar Windows/Docker y reproducir las pruebas reales de S09, empieza por
+[S09_EJECUCION_Y_EVIDENCIAS.md](S09_EJECUCION_Y_EVIDENCIAS.md), luego ejecuta
+`S09_PRUEBAS.ps1`. Documentación del ciclo de vida y contratos:
+[docs/S09_ESTADOS_Y_CONTRATOS.md](docs/S09_ESTADOS_Y_CONTRATOS.md).
+
+**Importante:** la actividad autónoma del Proyecto Sello de la sección 4 de
+la guía sigue requiriendo el código del proyecto propio y evidencias reales.

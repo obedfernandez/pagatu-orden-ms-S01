@@ -1,0 +1,50 @@
+name: pagatu-pago-prod
+
+services:
+  postgres-pago:
+    image: postgres:16-alpine
+    container_name: pagatu-postgres-pago
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-pagatu_pago_db}
+      POSTGRES_USER: ${DB_USER:-pagatu}
+      POSTGRES_PASSWORD: ${DB_PASS:-pagatu}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-pagatu} -d ${DB_NAME:-pagatu_pago_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "25435:5432"
+    volumes:
+      - pagatu_pago_data:/var/lib/postgresql/data
+    networks:
+      - pagatu-pago-int
+
+  pagatu-pago-ms:
+    build: .
+    container_name: pagatu-pago-ms
+    restart: unless-stopped
+    depends_on:
+      postgres-pago:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      CONFIG_SERVER_URL: http://pagatu-config:8888
+      DB_HOST: pagatu-postgres-pago
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-pagatu_pago_db}
+      DB_USER: ${DB_USER:-pagatu}
+      DB_PASS: ${DB_PASS:-pagatu}
+    networks:
+      - pagatu-pago-int
+      - pagatu-prod-net
+
+volumes:
+  pagatu_pago_data:
+
+networks:
+  pagatu-pago-int:
+    name: pagatu-pago-int
+  pagatu-prod-net:
+    external: true
