@@ -40,4 +40,8 @@ public class Cliente {
 
     @Column(length = 20)
     private String whatsapp;
+
+    // Vinculo explicito a un usuario de Keycloak. No cambia el ID de negocio.
+    @Column(name = "keycloak_sub", length = 36, unique = true)
+    private String keycloakSub;
 }

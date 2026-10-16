@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 public class OrdenCreadaEvento {
     private String tipoEvento;
     private Long ordenId;
-    private Long idCliente;
+    private String idCliente;
     private BigDecimal total;
     private String metodoPago;
     private String origen;

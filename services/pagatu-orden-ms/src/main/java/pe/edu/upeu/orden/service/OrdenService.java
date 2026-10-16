@@ -5,7 +5,7 @@ import pe.edu.upeu.orden.dto.OrdenResponse;
 import java.util.List;
 
 public interface OrdenService {
-    OrdenResponse crear(OrdenRequest request, Long idCliente);
+    OrdenResponse crear(OrdenRequest request, String idCliente);
     OrdenResponse findById(Long id);
     List<OrdenResponse> listar();
     void marcarPagada(Long ordenId);

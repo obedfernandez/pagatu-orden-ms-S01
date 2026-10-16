@@ -1,3 +1,5 @@
+> **S07b Keycloak:** consulta primero [S07B_LEEME_PRIMERO.md](S07B_LEEME_PRIMERO.md) para levantar el proyecto actualizado.
+
 # pagatu
 
 Sistema distribuido de comercio electrónico — proyecto del curso **Desarrollo de Aplicaciones Distribuidas** (DIST), UPeU 2026-2.

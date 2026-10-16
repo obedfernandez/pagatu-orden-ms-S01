@@ -16,8 +16,8 @@ public class NotificacionPago {
     @Column(name = "orden_id", nullable = false, unique = true)
     private Long ordenId;
 
-    @Column(name = "id_cliente", nullable = false)
-    private Long idCliente;
+    @Column(name = "id_cliente", nullable = false, length = 36)
+    private String idCliente;
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal monto;

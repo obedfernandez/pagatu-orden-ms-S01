@@ -50,6 +50,15 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     @Transactional(readOnly = true)
+    public ClienteResponse findByKeycloakSub(String sub) {
+        Cliente cliente = clienteRepository.findByKeycloakSub(sub)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existe perfil de cliente vinculado a este usuario de Keycloak"));
+        return clienteMapper.toResponse(cliente);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<ClienteResponse> listar() {
         return clienteRepository.findAll().stream()
                 .map(clienteMapper::toResponse)

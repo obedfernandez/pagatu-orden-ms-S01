@@ -9,6 +9,7 @@ public interface ClienteService {
     ClienteResponse crear(ClienteRequest request);
     ClienteResponse actualizar(Long id, ClienteRequest request);
     ClienteResponse findById(Long id);
+    ClienteResponse findByKeycloakSub(String sub);
     List<ClienteResponse> listar();
     void eliminar(Long id);
 }

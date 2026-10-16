@@ -19,11 +19,7 @@ public class ClienteController {
 
     @GetMapping("/me")
     public ClienteResponse miPerfil(@AuthenticationPrincipal Jwt jwt) {
-        Number claimIdCliente = jwt.getClaim("idCliente");
-        if (claimIdCliente == null) {
-            throw new IllegalArgumentException("Token sin idCliente: no hay un perfil de cliente asociado");
-        }
-        return clienteService.findById(claimIdCliente.longValue());
+        return clienteService.findByKeycloakSub(jwt.getSubject());
     }
 
     @PostMapping

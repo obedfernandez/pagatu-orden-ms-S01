@@ -1,0 +1,77 @@
+{
+  "realm": "pagatu",
+  "enabled": true,
+  "displayName": "Pagatu (desarrollo)",
+  "roles": {
+    "realm": [
+      {
+        "name": "CLIENTE",
+        "description": "Puede crear y consultar ordenes"
+      },
+      {
+        "name": "ADMIN",
+        "description": "Puede administrar catalogo"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "pagatu-frontend",
+      "name": "Pagatu Frontend S11",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "bearerOnly": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:4200/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:4200/*"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "cliente1",
+      "enabled": true,
+      "email": "cliente1@pagatu.com",
+      "emailVerified": true,
+      "requiredActions": [],
+      "realmRoles": [
+        "CLIENTE"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "cliente123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@pagatu.com",
+      "emailVerified": true,
+      "requiredActions": [],
+      "realmRoles": [
+        "ADMIN"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}
