@@ -16,6 +16,7 @@ import pe.edu.upeu.pago.mapper.PagoMapper;
 import pe.edu.upeu.pago.repository.PagoRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -73,6 +74,12 @@ public class PagoServiceImpl implements PagoService {
     @Transactional(readOnly = true)
     public PagoResponse obtener(Long id) {
         return pagoMapper.toResponse(buscarOFallar(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<PagoResponse> buscarPorOrden(Long ordenId) {
+        return pagoRepository.findByOrdenId(ordenId).map(pagoMapper::toResponse);
     }
 
     private Pago buscarOFallar(Long id) {

@@ -49,3 +49,7 @@ management:
   endpoint:
     health:
       show-details: always
+
+pagatu:
+  cors:
+    allowed-origins: ${PAGATU_FRONTEND_ORIGIN:http://localhost:4200}
