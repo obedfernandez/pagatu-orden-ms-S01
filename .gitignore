@@ -84,3 +84,7 @@ test-output/
 *.jks
 secrets/
 .blackboxcli/
+
+# S07b
+respaldos-s07b/
+keycloak/logs/
